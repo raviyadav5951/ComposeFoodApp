@@ -1,0 +1,40 @@
+package com.askfortricks.foodzapp.api
+
+import com.askfortricks.foodzapp.model.response.Category
+import com.askfortricks.foodzapp.model.response.MealsCategoriesResponse
+import retrofit2.Call
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.GET
+import retrofit2.http.Path
+
+
+class MealsWebService {
+
+    private var mealsApi:MealsAppService
+
+    init {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://www.themealdb.com/api/json/v1/1/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+         mealsApi = retrofit.create(MealsAppService::class.java)
+    }
+
+
+    interface MealsAppService {
+
+        @GET("categories.php")
+        fun getMealsCategoriesApi(): Call<MealsCategoriesResponse>
+    }
+
+
+    //Api Call methods that wil be accessed from View models
+
+    fun getMeals():Call<MealsCategoriesResponse>{
+        return mealsApi.getMealsCategoriesApi()
+    }
+
+
+}
