@@ -32,35 +32,3 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun MealsCategoriesScreen(){
-    val viewModel: MealCategoriesViewModel = viewModel()
-    val rememberedMeals:MutableState<List<Category>> =remember{ mutableStateOf(emptyList<Category>()) }
-
-    val coroutineScope= rememberCoroutineScope()
-    LaunchedEffect(key1 = "GET_MEALS"){
-        coroutineScope.launch(Dispatchers.Default) {
-            val meals =viewModel.getMealsFromRepo()
-            rememberedMeals.value= meals
-        }
-    }
-
-    
-    LazyColumn{
-        items(rememberedMeals.value){
-            meal->
-            Text(text = meal.strCategory)
-        }
-    }
-
-
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    FoodzAppTheme {
-        MealsCategoriesScreen()
-    }
-}
