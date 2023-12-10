@@ -24,17 +24,15 @@ class MealsWebService {
 
 
     interface MealsAppService {
-
         @GET("categories.php")
-        fun getMealsCategoriesApi(): Call<MealsCategoriesResponse>
+        suspend fun getMealsCategoriesApi(): MealsCategoriesResponse
     }
 
 
     //Api Call methods that wil be accessed from View models
 
-    fun getMeals():Call<MealsCategoriesResponse>{
+    suspend fun getMeals():MealsCategoriesResponse{
         return mealsApi.getMealsCategoriesApi()
     }
-
 
 }
