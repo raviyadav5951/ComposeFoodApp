@@ -17,13 +17,10 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,27 +35,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import coil.compose.rememberAsyncImagePainter
 import com.askfortricks.foodzapp.model.response.Category
+import com.askfortricks.foodzapp.ui.details.MealDetailsScreen
+import com.askfortricks.foodzapp.ui.details.MealDetailsViewModel
 import com.askfortricks.foodzapp.ui.theme.FoodzAppTheme
 
 @Composable
-fun MealsCategoriesScreen() {
+fun MealsCategoriesScreen(navigationCallback: (String) -> Unit) {
 
     val viewModel: MealCategoriesViewModel = viewModel()
-
     val meals = viewModel.mealsState.value
-//    LaunchedEffect(key1 = "GET_MEALS"){
-//        coroutineScope.launch(Dispatchers.Default) {
-//            val meals =viewModel.getMealsFromRepo()
-//            rememberedMeals.value= meals
-//        }
-//    }
-
 
     LazyColumn {
         items(meals) { meal ->
-            MealCategory(meal = meal)
+            MealCategory(meal, navigationCallback)
         }
     }
 
@@ -67,7 +62,34 @@ fun MealsCategoriesScreen() {
 }
 
 @Composable
-fun MealCategory(meal: Category) {
+fun FoodzApp() {
+
+    val navigationController = rememberNavController()
+
+    NavHost(navController = navigationController, startDestination = "dest_list") {
+
+        composable(route = "dest_list") {
+            MealsCategoriesScreen { navigationMealID ->
+                navigationController.navigate(route = "dest_detail/$navigationMealID")
+            }
+        }
+
+        composable(
+            route = "dest_detail/{meal_category_id}",
+            arguments = listOf(navArgument(name = "meal_category_id") {
+                type = NavType.StringType
+            })
+        ) {
+            val viewModel: MealDetailsViewModel = viewModel()
+            MealDetailsScreen(viewModel.mealState.value)
+        }
+    }
+
+
+}
+
+@Composable
+fun MealCategory(meal: Category, navigationCallback: (String) -> Unit) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Card(
@@ -76,6 +98,9 @@ fun MealCategory(meal: Category) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp)
+            .clickable {
+                navigationCallback(meal.idCategory)
+            }
     ) {
 
         Row(
@@ -94,9 +119,11 @@ fun MealCategory(meal: Category) {
                     .align(Alignment.CenterVertically),
                 contentScale = ContentScale.Crop
             )
-            Column(modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth(0.8f)) {
+            Column(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(0.8f)
+            ) {
                 Text(
                     text = meal.strCategory,
                     fontSize = 16.sp,
@@ -120,7 +147,7 @@ fun MealCategory(meal: Category) {
                 contentDescription = "icon",
                 modifier = Modifier
                     .padding(10.dp)
-                    .align(if(isExpanded)Alignment.Bottom else Alignment.CenterVertically)
+                    .align(if (isExpanded) Alignment.Bottom else Alignment.CenterVertically)
                     .clickable {
                         isExpanded = !isExpanded
                     }
@@ -138,6 +165,6 @@ fun MealCategory(meal: Category) {
 @Composable
 fun GreetingPreview() {
     FoodzAppTheme {
-        MealsCategoriesScreen()
+        FoodzApp()
     }
 }
